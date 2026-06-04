@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>cs603_particle_filter_d2</name>
+  <version>0.0.1</version>
+
+  <description>
+    COMPSCI 603 Project 3 Deliverable 2
+
+    This package implements known-map robot localization using a particle filter
+    in ROS Noetic and Gazebo with the Triton robot model.
+
+    Deliverable 2 is a separate package that reuses selected components from Deliverable 1, including:
+    - map preprocessing outputs (metric_map.npy, likelihood_field.npy)
+    - map metadata and occupancy image
+    - position_publisher.py odometry bridge
+    - teleoperation interface
+    - Gazebo world and robot spawn structure
+
+    This package uses the starter simulation environment structure
+    (Gazebo + Triton + turtlebot3 house world) and Deliverable 1 map-generation
+    outputs.
+
+    How to run the demo:
+
+    1) Build the workspace:
+       cd ~/catkin_ws
+       catkin_make
+       source devel/setup.bash
+
+    2) Launch the full particle filter demo:
+       roslaunch cs603_particle_filter_d2 particle_filter_d2.launch
+
+    This launch file starts:
+    - Gazebo house world
+    - Triton robot spawn
+    - static TF publishers
+    - map_server for RViz occupancy-grid visualization
+    - position_publisher.py for /odom
+    - particle_filter_d2.py
+    - teleop_particle_filter.py
+    - RViz visualization
+
+    3) In RViz, the following are visualized:
+    - /map
+    - /pf/particles
+    - /pf/estimated_pose
+    - /scan
+    - TF
+
+    4) Use keyboard teleoperation to move the robot and observe:
+    - global particle initialization
+    - convergence of the particle cloud
+    - estimated robot pose tracking on the map
+  </description>
+
+  <maintainer email="rrduvvuru@umass.edu">Rohit Duvvuru</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>tf</depend>
+  <depend>gazebo_ros</depend>
+  <depend>gazebo_msgs</depend>
+  <depend>map_server</depend>
+
+  <export>
+  </export>
+</package>

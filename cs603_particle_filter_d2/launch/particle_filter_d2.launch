@@ -1,0 +1,120 @@
+<launch>
+    <!-- Gazebo world / robot spawn -->
+    <arg name="world_file" default="$(find turtlebot3_gazebo)/worlds/turtlebot3_house.world"/>
+    <arg name="robot_name" default="triton"/>
+    <arg name="sdf_robot_file" default="$(find cs603_particle_filter_d2)/models/$(arg robot_name)/model.sdf"/>
+
+    <!-- Initial robot pose in Gazebo -->
+    <arg name="x" default="-3.0" />
+    <arg name="y" default="1.0" />
+    <arg name="z" default="0.0" />
+    <arg name="roll" default="0.0" />
+    <arg name="pitch" default="0.0" />
+    <arg name="yaw" default="0.0" />
+
+    <!-- Map / likelihood-field files -->
+    <arg name="map_yaml" default="$(find cs603_particle_filter_d2)/maps/house_map.yaml" />
+    <arg name="metric_map_npy" default="$(find cs603_particle_filter_d2)/maps/metric_map.npy" />
+    <arg name="likelihood_field_npy" default="$(find cs603_particle_filter_d2)/maps/likelihood_field.npy" />
+
+    <!-- Particle filter parameters -->
+    <arg name="num_particles" default="1000" />
+    <arg name="max_beams" default="20" />
+    <arg name="z_hit" default="0.90" />
+    <arg name="z_rand" default="0.10" />
+
+    <!-- Motion model noise -->
+    <arg name="alpha1" default="0.02" />
+    <arg name="alpha2" default="0.02" />
+    <arg name="alpha3" default="0.02" />
+    <arg name="alpha4" default="0.02" />
+
+    <!-- Optional recovery / robustness params -->
+    <arg name="random_particle_ratio" default="0.10" />
+    <arg name="motion_threshold_trans" default="0.01" />
+    <arg name="motion_threshold_rot" default="0.01" />
+
+    <!-- Launch Gazebo -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="use_sim_time" value="true"/>
+      <arg name="debug" value="false"/>
+      <arg name="paused" value="false"/>
+      <arg name="gui" value="true" />
+      <arg name="world_name" value="$(arg world_file)"/>
+      <arg name="verbose" value="true"/>
+      <arg name="recording" value="false"/>
+    </include>
+
+    <!-- Spawn Triton -->
+    <node pkg="gazebo_ros"
+          type="spawn_model"
+          name="$(arg robot_name)_spawn_urdf"
+          respawn="false"
+          output="screen"
+          args="-file $(arg sdf_robot_file) -sdf -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw) -model $(arg robot_name)" />
+
+    <!-- TF tree -->
+    <node pkg="tf"
+          type="static_transform_publisher"
+          name="base_link_to_base_scan"
+          args="0 0 0.161 0 0 0 /base_link /base_scan 100" />
+
+    <node pkg="tf"
+          type="static_transform_publisher"
+          name="world_to_odom"
+          args="0 0 0 0 0 0 /world /odom 100" />
+
+    <node pkg="tf"
+          type="static_transform_publisher"
+          name="map_to_world"
+          args="0.0 0.0 0.0 0 0 0.0 /map /world 100" />
+
+    <!-- Publish occupancy map for RViz -->
+    <node pkg="map_server"
+          type="map_server"
+          name="map_server"
+          args="$(arg map_yaml)" />
+
+    <!-- Publish /odom from Gazebo model state -->
+    <node pkg="cs603_particle_filter_d2"
+          type="position_publisher.py"
+          name="position_publisher"
+          output="screen" />
+
+    <!-- Particle filter -->
+    <node pkg="cs603_particle_filter_d2"
+          type="particle_filter_d2.py"
+          name="particle_filter_d2"
+          output="screen">
+        <param name="map_yaml" value="$(arg map_yaml)" />
+        <param name="metric_map_npy" value="$(arg metric_map_npy)" />
+        <param name="likelihood_field_npy" value="$(arg likelihood_field_npy)" />
+
+        <param name="num_particles" value="$(arg num_particles)" />
+        <param name="max_beams" value="$(arg max_beams)" />
+        <param name="z_hit" value="$(arg z_hit)" />
+        <param name="z_rand" value="$(arg z_rand)" />
+
+        <param name="alpha1" value="$(arg alpha1)" />
+        <param name="alpha2" value="$(arg alpha2)" />
+        <param name="alpha3" value="$(arg alpha3)" />
+        <param name="alpha4" value="$(arg alpha4)" />
+
+        <param name="random_particle_ratio" value="$(arg random_particle_ratio)" />
+        <param name="motion_threshold_trans" value="$(arg motion_threshold_trans)" />
+        <param name="motion_threshold_rot" value="$(arg motion_threshold_rot)" />
+    </node>
+
+    <!-- Keyboard teleop -->
+    <node pkg="cs603_particle_filter_d2"
+          type="teleop_particle_filter.py"
+          name="teleop_particle_filter"
+          output="screen" />
+
+    <!-- RViz -->
+    <node pkg="rviz"
+          type="rviz"
+          name="rviz"
+          args="-d $(find cs603_particle_filter_d2)/rviz/particle_filter_d2.rviz"
+          required="false" />
+</launch>
