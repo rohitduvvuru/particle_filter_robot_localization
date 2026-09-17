@@ -1,10 +1,8 @@
 # Particle Filter Robot Localization
 
-Particle Filter Localization Video: 
+Particle Filter Localization GIF:
 
-<video src="kazam_dnuky2a0.movie.mp4" controls="controls" style="max-width: 100%;">
-  Your browser does not support the video tag.
-</video>
+<img width="800" height="485" alt="kazam_dnuky2a0 movie-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/3e54281a-0b89-4d6c-a91d-657c94bb5175" />
 
 This repository contains a ROS Noetic package for known-map robot localization with a particle filter in Gazebo. The package launches a Triton robot in the TurtleBot3 house world, publishes odometry from Gazebo model state, runs a likelihood-field particle filter from laser scans, and visualizes the map, particles, estimated pose, laser data, and TF tree in RViz.
 
